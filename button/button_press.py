@@ -8,7 +8,7 @@ def release():
     print("You released the button")
 
 
-button = Button(27) # This is the pin that the white wire is connected to.
+button = Button(27) # Connect the white wire is connected to GPIO27 or Pin 13
 
 button.when_pressed = press
 button.when_released = release
