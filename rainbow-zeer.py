@@ -13,8 +13,8 @@ uart = serial.Serial("/dev/serial0", baudrate=19200, timeout=3000) # Sets up ser
 ThermalPrinter = adafruit_thermal_printer.get_printer_class(2.69) # Gets printer class
 printer = ThermalPrinter(uart) # Sets up printer
 button = Button(27) # Connect the white wire is connected to GPIO27 or Pin 13
-light = PWMLED(21)
-
+light = PWMLED(13) # Connect button LED to GPIO13 or Pin 39
+light.value = 1
 def playMessage(message = "No Fortune"):
     tts = gTTS(message, lang='en', tld='ie')
     with open('test.mp3', 'wb') as f:

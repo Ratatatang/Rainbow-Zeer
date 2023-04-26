@@ -4,7 +4,7 @@ import time
 
 
 LED_COUNT = 16
-LED_PIN = board.D18
+LED_PIN = board.D21
 ORDER = neopixel.GRB
 
 auto_write = False
