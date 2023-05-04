@@ -19,4 +19,4 @@
 |Button Light White|GPIO13|33|34|Ground|Ground|Button Light Blue|
 ||GPIO19|35|36|GPIO16||
 ||GPIO26|37|38|GPIO20||
-|NeoPixel DIN (White)|Ground|39|40|GPIO21|Neo Pixel Ground (Blue)|
+|NeoPixel Ground (Blue)|Ground|39|40|GPIO21|Neo Pixel DIN (White)|

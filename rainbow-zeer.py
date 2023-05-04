@@ -8,19 +8,36 @@ from gpiozero import PWMLED
 from time import sleep
 import random
 import textwrap
+import board
+import neopixel
+import threading
 
+# Printer Config
 uart = serial.Serial("/dev/serial0", baudrate=19200, timeout=3000) # Sets up serial connection
 ThermalPrinter = adafruit_thermal_printer.get_printer_class(2.69) # Gets printer class
 printer = ThermalPrinter(uart) # Sets up printer
+
+# Button Config
 button = Button(27) # Connect the white wire is connected to GPIO27 or Pin 13
 light = PWMLED(13) # Connect button LED to GPIO13 or Pin 39
 light.value = 1
+
+# NeoPixel Config
+LED_COUNT = 16
+LED_PIN = board.D21
+ORDER = neopixel.GRB
+
+auto_write = False
+brightness = 1
+brightness_step = .01
+pixels = neopixel.NeoPixel(LED_PIN, LED_COUNT, auto_write=auto_write, pixel_order=ORDER, bpp=4)
+
 def playMessage(message = "No Fortune"):
     tts = gTTS(message, lang='en', tld='ie')
-    with open('test.mp3', 'wb') as f:
+    with open('fortune.mp3', 'wb') as f:
         tts.write_to_fp(f)
 
-    os.system('mplayer test.mp3')
+    os.system('mplayer fortune.mp3')
 
 def printMessage(message = "No Fortune"):
     if not printer.has_paper:
@@ -43,10 +60,8 @@ def button_pulse():
     print('button pulse')
     light.pulse()
 
-
 def button_off():
-    print("turn LED off button")
-#    light = PWMLED(21)
+    print("turn LED button off")
     light.off()
 
 def get_fortune():
@@ -60,25 +75,56 @@ def get_fortune():
 
     return fortune
 
+def wheel(pos):
+    if pos < 0 or pos > 255:
+        r = g = b = 0
+    elif pos < 85:
+        r = int(pos*3)
+        g = int(255 - pos * 3)
+        b = 0
+    elif pos < 170:
+        pos -= 85
+        r = int(255 - pos * 3)
+        g = 0
+        b = int(pos * 3)
+    else:
+        pos -= 170
+        r = 0
+        g = int(pos * 3)
+        b = int(255 - pos * 3)
+    return (r,g,b) if ORDER in (neopixel.RGB, neopixel.GRB) else (r, g, b, 0)
 
-def swirlyBall():
-    print("swirly ball")
-    
-def solidBall():
-    print("solid ball")
+def rainbow_cycle():
+    while True:
+        if event.is_set():
+            break
+        for j in range(255):
+            for i in range(LED_COUNT):
+                pixel_index = (i * 256 // LED_COUNT) + j
+                pixels[i] = wheel(pixel_index & 255)
+            pixels.brightness = 1
+            pixels.show()
+            sleep(0.001)
 
-
+def solid_ball():
+    pixels.fill((255,255,255))
+    pixels.brightness = .3
+    pixels.show()
 
 while(True):
+    solid_ball()
     button_pulse()
-    solidBall()
     print("waiting")
     button.wait_for_press()
     print("pressed")
     button_off()
-    swirlyBall()
+    event = threading.Event()
+    swirl_thread = threading.Thread(target=rainbow_cycle, name='swirl')
+    swirl_thread.start()
+    os.system('mplayer intro.mp3')
     fortune = get_fortune()
     playMessage(fortune)
+    
+    event.set()
+    sleep(1)
     printMessage(fortune)
-    #Wait for print? if not possible, just sleep for a good moment before resetting
-    # sleep(1.0)
