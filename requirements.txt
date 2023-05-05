@@ -1,1 +1,5 @@
-gTTS
+boto3
+adafruit-circuitpython-neopixel
+adafruit-blinka
+gpiozero
+adafruit-circuitpython-thermal-printer
