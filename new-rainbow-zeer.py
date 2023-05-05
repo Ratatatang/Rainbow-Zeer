@@ -21,7 +21,8 @@ light.value = 1
 # This function takes the fortune message as an argument
 def playMessage(message = "No Fortune"):
     # This creates the filename for the mp3 file
-    mp3File = f"./audio/{message.replace(' ', '_').replace('\n', '').replace('.', '')}.mp3"
+    m = message.replace(' ', '_').replace('\n', '').replace('.', '')
+    mp3File = f"./audio/{m}.mp3"
     # Check to see if the file exists
     if os.path.exists(mp3File):
         # If it does, play the file
