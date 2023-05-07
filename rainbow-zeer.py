@@ -12,6 +12,7 @@ import board
 import neopixel
 import threading
 
+
 # Printer Config
 uart = serial.Serial("/dev/serial0", baudrate=19200, timeout=3000) # Sets up serial connection
 ThermalPrinter = adafruit_thermal_printer.get_printer_class(2.69) # Gets printer class
@@ -32,17 +33,36 @@ brightness = 1
 brightness_step = .01
 pixels = neopixel.NeoPixel(LED_PIN, LED_COUNT, auto_write=auto_write, pixel_order=ORDER, bpp=4)
 
+
+# This function plays a message, given a string. If the message is in the audio directory,
+# then it will play it. Otherwise, it will play the No_Fortune.mp3 file.
+# This function takes the fortune message as an argument
 def playMessage(message = "No Fortune"):
-    tts = gTTS(message, lang='en', tld='ie')
-    with open('fortune.mp3', 'wb') as f:
-        tts.write_to_fp(f)
+    # This creates the filename for the mp3 file
+    m = message.replace(' ', '_').replace('\n', '').replace('.', '')
+    mp3File = f"./audio/{m}.mp3"
+    # Check to see if the file exists
+    if os.path.exists(mp3File):
+        # If it does, play the file
+        os.system(f'mpg321 -q {mp3File}')
+        # Return the message
+        return message
+    else:
+        # If the file does not exist, play the No_Fortune.mp3 file
+        os.system(f'mpg321 -q ./audio/standard/No_Fortune.mp3')
+        # Return a generic message
+        return "Your future is unclear to me"
 
-    os.system('mplayer fortune.mp3')
-
+# This function prints a message to the printer. It checks if there is paper in the printer
+# and if there is not it plays a message instead. It then prints the message and a random
+# number between 0 and 100. It then feeds the printer 5 times to ensure the paper is
+# completely ejected. 
 def printMessage(message = "No Fortune"):
     if not printer.has_paper:
-        playMessage("Oops! I am out of paper, or am disconnected from the printer.")
+        os.system(f'mpg321 -q ./audio/standard/No_Paper.mp3')
     else:
+        if(len(fortune) > 16):
+            message = '\n'.join(textwrap.wrap(message, 16))
         printer._set_size(1)
         print(f"Printing: {message}")
         printer.print('--------------------------------')
@@ -60,8 +80,9 @@ def button_pulse():
     print('button pulse')
     light.pulse()
 
+
 def button_off():
-    print("turn LED button off")
+    print("turn LED off button")
     light.off()
 
 def get_fortune():
@@ -70,8 +91,6 @@ def get_fortune():
         fortunes = f.readlines()
     
     fortune = fortunes[random.randint(0, len(fortunes)-1)]
-    if(len(fortune) > 16):
-        fortune = '\n'.join(textwrap.wrap(fortune, 16))
 
     return fortune
 
@@ -112,8 +131,8 @@ def solid_ball():
     pixels.show()
 
 while(True):
-    solid_ball()
     button_pulse()
+    solid_ball()
     print("waiting")
     button.wait_for_press()
     print("pressed")
@@ -121,10 +140,12 @@ while(True):
     event = threading.Event()
     swirl_thread = threading.Thread(target=rainbow_cycle, name='swirl')
     swirl_thread.start()
-    os.system('mplayer intro.mp3')
+    os.system(f'mpg321 -q ./audio/standard/intro.mp3')
+    sleep(4)
     fortune = get_fortune()
-    playMessage(fortune)
-    
+    print(fortune)
+    fortune = playMessage(fortune)
+    printMessage(fortune)
     event.set()
     sleep(1)
-    printMessage(fortune)
+    
