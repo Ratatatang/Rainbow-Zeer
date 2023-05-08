@@ -24,3 +24,17 @@ https://learn.adafruit.com/mini-thermal-receipt-printer/circuitpython
 - ChatGPT
 - SarahJean Meyer
 - Marcy Epst
+
+
+Setup notes:
+
+After installing the OS and pulling your files down from github remember to do the following
+
+- Install requirements with ***pip install -r requirements.txt***
+- Disable serial console so that you can use the seriel port for the printer
+    - By default, the serial console will take up the pins needed by the printer.  To be able to use the printer you have to follow these instructions: https://learn.adafruit.com/adafruits-raspberry-pi-lesson-5-using-a-console-cable/enabling-serial-console
+- If needed, modify the localpath variable in the rainbow-zeer.py script.
+- Verify your software is working
+- Setup script to run as a service
+    - see how-to-start-on-boot.md
+- Consider also disabling the desktop and running with the ctl only.  This is done using rasp-config

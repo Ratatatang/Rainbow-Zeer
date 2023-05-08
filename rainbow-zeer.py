@@ -12,6 +12,7 @@ import board
 import neopixel
 import threading
 
+localpath = "/home/admin/repos/Rainbow-Zeer"
 
 # Printer Config
 uart = serial.Serial("/dev/serial0", baudrate=19200, timeout=3000) # Sets up serial connection
@@ -40,7 +41,7 @@ pixels = neopixel.NeoPixel(LED_PIN, LED_COUNT, auto_write=auto_write, pixel_orde
 def playMessage(message = "No Fortune"):
     # This creates the filename for the mp3 file
     m = message.replace(' ', '_').replace('\n', '').replace('.', '')
-    mp3File = f"./audio/{m}.mp3"
+    mp3File = f"{localpath}/audio/{m}.mp3"
     # Check to see if the file exists
     if os.path.exists(mp3File):
         # If it does, play the file
@@ -49,7 +50,7 @@ def playMessage(message = "No Fortune"):
         return message
     else:
         # If the file does not exist, play the No_Fortune.mp3 file
-        os.system(f'mpg321 -q ./audio/standard/No_Fortune.mp3')
+        os.system(f'mpg321 -q {localpath}/audio/standard/No_Fortune.mp3')
         # Return a generic message
         return "Your future is unclear to me"
 
@@ -59,7 +60,7 @@ def playMessage(message = "No Fortune"):
 # completely ejected. 
 def printMessage(message = "No Fortune"):
     if not printer.has_paper:
-        os.system(f'mpg321 -q ./audio/standard/No_Paper.mp3')
+        os.system(f'mpg321 -q {localpath}/audio/standard/No_Paper.mp3')
     else:
         if(len(fortune) > 16):
             message = '\n'.join(textwrap.wrap(message, 16))
@@ -87,7 +88,7 @@ def button_off():
 
 def get_fortune():
     fortunes = []
-    with open("fortunes.txt", "r") as f:
+    with open(f"{localpath}/fortunes.txt", "r") as f:
         fortunes = f.readlines()
     
     fortune = fortunes[random.randint(0, len(fortunes)-1)]
@@ -140,7 +141,7 @@ while(True):
     event = threading.Event()
     swirl_thread = threading.Thread(target=rainbow_cycle, name='swirl')
     swirl_thread.start()
-    os.system(f'mpg321 -q ./audio/standard/intro.mp3')
+    os.system(f'mpg321 -q {localpath}/audio/standard/intro.mp3')
     sleep(4)
     fortune = get_fortune()
     print(fortune)

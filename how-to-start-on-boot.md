@@ -1,30 +1,62 @@
 # Start on boot
 
-https://raspberrypi-guide.github.io/programming/run-script-on-boot
+To get our script to run on boot, we are going to set it up as a service.
 
-## Using rc.local
+Define the service by running the following to create the file
 
-There are a number of ways to have a command, script or program run when the Raspberry pi boots. This is especially useful if you want to power up your Pi in headless mode (that is without a connected monitor), and have it run a program without configuration or a manual start. I suggest to use the method that uses the rc.local file.
-
-On your Pi, edit the file /etc/rc.local using the editor of your choice. You must edit it with root permissions:
-``` 
-sudo nano /etc/rc.local
+```
+sudo nano /lib/systemd/system/rainbowzeer.service
 ```
 
-Add commands to execute the python program, preferably using absolute referencing of the file location (complete file path are preferred). I think the path will be something like /home/admin/repos/Rainbow-Zeer/rainbow-zeer.py.  You can figure out for sure by changing directory to where your script is and running the command ```pwd```.  Since this is going to be running at boot but running continuously you want to make sure it is run in the background by adding a "&" at the end of the line.  So what you want in your rc.local files should be something like ***python3 /home/admin/repos/Rainbow-zeer/rainbow-zeer.py &***
-The ampersand allows the command to run in a separate process and continue booting with the process running.
+Set its contents to
 
-Be sure to leave the line exit 0 at the end, then save the file and exit. In nano, to exit, type Ctrl-x, and then Y.
-
-Next make sure your file rc.local is executable by running 
 ```
-sudo chmod a+x /etc/rc.local
+[Unit]
+Description=Rainbow Zeer
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/admin/repos/Rainbow-Zeer/rainbow-zeer.py > /home/admin/repos/Rainbow-Zeer/running.log
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-Reboot to test
+Run the following commands to activate it
 
-``` 
-sudo reboot
+```
+sudo chmod 644 /lib/systemd/system/rainbowzeer.service
+sudo systemctl daemon-reload
+sudo systemctl enable rainbowzeer.service
+sudo systemctl start rainbowzeer.service
 ```
 
-Check the link above for other methods.
+
+# Service Tasks
+For every change that we do on the /lib/systemd/system folder we need to execute a daemon-reload (third line of previous code). If we want to check the status of our service, you can execute:
+
+sudo systemctl status rainbowzeer.service
+
+In general:
+
+## Check status
+```
+sudo systemctl status rainbowzeer.service
+```
+
+## Start service
+```
+sudo systemctl start rainbowzeer.service
+```
+
+## Stop service
+```
+sudo systemctl stop rainbowzeer.service
+```
+
+## Check service's log
+```
+sudo journalctl -f -u rainbowzeer.service
+```
